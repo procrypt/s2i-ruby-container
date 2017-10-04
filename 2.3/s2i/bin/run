@@ -13,27 +13,20 @@ function check_number() {
     exit 1
   fi
 }
-check_number PUMA_WORKERS     "${PUMA_WORKERS:-0}"
-check_number PUMA_MIN_THREADS "${PUMA_MIN_THREADS:-0}"
-check_number PUMA_MAX_THREADS "${PUMA_MAX_THREADS:-0}"
 
-export RACK_ENV=${RACK_ENV:-"production"}
+export FLUENT_ENTRYCONF=${FLUENT_ENTRYCONF:-"/etc/fluent/entrypoint/fluent.conf"}
 
-if is_puma_installed; then
-  export_vars=$(cgroup-limits) ; export $export_vars
-
-  exec bundle exec "puma --config ../etc/puma.cfg"
+if [[ $VERBOSE ]]; then
+  set -ex
+  fluentdargs="-vv"
 else
-  echo "You might consider adding 'puma' into your Gemfile."
-
-  if bundle exec rackup -h &>/dev/null; then
-    if [ -f Gemfile ]; then
-      exec bundle exec "rackup -E ${RAILS_ENV:-$RACK_ENV} -P /tmp/rack.pid --host 0.0.0.0 --port 8080"
-    else
-      exec rackup -E "${RAILS_ENV:-$RACK_ENV}" -P /tmp/rack.pid --host 0.0.0.0 --port 8080
-    fi
-  else
-    echo "ERROR: Rubygem Rack is not installed in the present image."
-    echo "       Add rack to your Gemfile in order to start the web server."
-  fi
+  set -e
+  fluentdargs=
 fi
+
+#IPADDR4=`/usr/sbin/ip -4 addr show dev eth0 | grep inet | sed -e "s/[ \t]*inet \([0-9.]*\).*/\1/"`
+#IPADDR6=`/usr/sbin/ip -6 addr show dev eth0 | grep inet6 | sed "s/[ \t]*inet6 \([a-f0-9:]*\).*/\1/"`
+#export IPADDR4 IPADDR6
+
+bundle exec fluentd $fluentdargs -c /etc/fluent/entrypoint/fluent.conf
+

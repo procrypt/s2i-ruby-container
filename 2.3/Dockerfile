@@ -5,7 +5,8 @@ FROM centos/s2i-base-centos7
 
 EXPOSE 8080
 
-ENV RUBY_VERSION 2.3
+ENV RUBY_VERSION 2.3\
+    FLUENTD_VERSION 0.12.23
 
 ENV SUMMARY="Platform for building and running Ruby $RUBY_VERSION applications" \
     DESCRIPTION="Ruby $RUBY_VERSION available as container is a base platform for \
@@ -18,7 +19,6 @@ LABEL summary="$SUMMARY" \
       description="$DESCRIPTION" \
       io.k8s.description="$DESCRIPTION" \
       io.k8s.display-name="Ruby 2.3" \
-      io.openshift.expose-services="8080:http" \
       io.openshift.tags="builder,ruby,ruby23,rh-ruby23" \
       com.redhat.component="rh-ruby23-docker" \
       name="centos/ruby-23-centos7" \
@@ -26,10 +26,14 @@ LABEL summary="$SUMMARY" \
       usage="s2i build https://github.com/sclorg/s2i-ruby-container.git --context-dir=2.4/test/puma-test-app/ centos/ruby-23-centos7 ruby-sample-app" \
       maintainer="SoftwareCollections.org <sclorg@redhat.com>"
 
-RUN yum install -y centos-release-scl && \
-    INSTALL_PKGS="rh-ruby23 rh-ruby23-ruby-devel rh-ruby23-rubygem-rake rh-ruby23-rubygem-bundler" && \
+RUN yum install -y centos-release-scl epel-release && \
+    yum-config-manager --enable centos-sclo-rh-testing && \
+    INSTALL_PKGS="rh-ruby23 rh-ruby23-ruby-devel rh-ruby23-rubygem-rake rh-ruby23-rubygem-bundler rh-nodejs4 zeromq3" && \
     yum install -y --setopt=tsflags=nodocs $INSTALL_PKGS && rpm -V $INSTALL_PKGS && \
-    yum clean all -y
+    yum clean all -y && \
+    ln -s /usr/lib64/libzmq.so.3 /usr/local/lib/libzmq.so
+
+RUN bundle install fluentd
 
 # Copy the S2I scripts from the specific language image to $STI_SCRIPTS_PATH
 COPY ./s2i/bin/ $STI_SCRIPTS_PATH
