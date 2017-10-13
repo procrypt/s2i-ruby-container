@@ -6,7 +6,7 @@ FROM centos/s2i-base-centos7
 EXPOSE 8080
 
 ENV RUBY_VERSION 2.3\
-    FLUENTD_VERSION 0.12.23
+    FLUENTD_VERSION 0.12.23\
 
 ENV SUMMARY="Platform for building and running Ruby $RUBY_VERSION applications" \
     DESCRIPTION="Ruby $RUBY_VERSION available as container is a base platform for \
@@ -14,6 +14,8 @@ building and running various Ruby $RUBY_VERSION applications and frameworks. \
 Ruby is the interpreted scripting language for quick and easy object-oriented programming. \
 It has many features to process text files and to do system management tasks (as in Perl). \
 It is simple, straight-forward, and extensible."
+
+ARG SCL_VERSION=rh-ruby23
 
 LABEL summary="$SUMMARY" \
       description="$DESCRIPTION" \
@@ -33,7 +35,9 @@ RUN yum install -y centos-release-scl epel-release && \
     yum clean all -y && \
     ln -s /usr/lib64/libzmq.so.3 /usr/local/lib/libzmq.so
 
-RUN bundle install fluentd
+RUN scl enable ${SCL_VERSION} -- \
+    gem install -N --conservative --minimal-deps --no-ri \
+    'fluentd:<0.14'
 
 # Copy the S2I scripts from the specific language image to $STI_SCRIPTS_PATH
 COPY ./s2i/bin/ $STI_SCRIPTS_PATH
