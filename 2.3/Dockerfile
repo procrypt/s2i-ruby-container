@@ -5,8 +5,8 @@ FROM centos/s2i-base-centos7
 
 EXPOSE 8080
 
-ENV RUBY_VERSION 2.3\
-    FLUENTD_VERSION 0.12.23\
+ENV RUBY_VERSION=2.3\
+    FLUENTD_VERSION=0.12.23\
 
 ENV SUMMARY="Platform for building and running Ruby $RUBY_VERSION applications" \
     DESCRIPTION="Ruby $RUBY_VERSION available as container is a base platform for \
