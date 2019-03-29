@@ -31,7 +31,7 @@ LABEL summary="$SUMMARY" \
 
 RUN yum install -y centos-release-scl epel-release && \
     yum-config-manager --enable centos-sclo-rh-testing && \
-    INSTALL_PKGS="rh-ruby23 rh-ruby23-ruby-devel rh-ruby23-rubygem-rake rh-ruby23-rubygem-bundler rh-nodejs4 zeromq3 netcat" && \
+    INSTALL_PKGS="rh-ruby23 rh-ruby23-ruby-devel rh-ruby23-rubygem-rake rh-ruby23-rubygem-bundler rh-nodejs4 zeromq3 nc" && \
     yum install -y --setopt=tsflags=nodocs $INSTALL_PKGS && rpm -V $INSTALL_PKGS && \
     yum clean all -y && \
     ln -s /usr/lib64/libzmq.so.3 /usr/local/lib/libzmq.so
