@@ -38,7 +38,7 @@ RUN yum install -y centos-release-scl epel-release && \
 
 RUN scl enable ${SCL_VERSION} -- \
     gem install -N --conservative --minimal-deps --no-ri \
-    'fluentd:<0.14'
+    fluentd -v 1.2.1
 
 # Copy the S2I scripts from the specific language image to $STI_SCRIPTS_PATH
 COPY ./s2i/bin/ $STI_SCRIPTS_PATH
